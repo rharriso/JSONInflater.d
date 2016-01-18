@@ -17,7 +17,6 @@ enum JSONTypes{
 */
 void Unmarshall(T)(ref T outObj, in JSONValue json){
   alias fnt = FieldNameTuple!T;
-  alias ftt = FieldTypeTuple!T;
   alias JSONTypes[string] fields;
 
   // create map from name to type
@@ -49,3 +48,14 @@ void Unmarshall(T)(ref T outObj, in JSONValue json){
 /*
   return json object for a given class
 */
+JSONValue Marshall(T)(in T inObj){
+  auto outJson = new JSONValue();
+  alias fnt = FieldNameTuple!T;
+  
+  // create map from name to type
+  foreach(k; fnt){
+    outJson[k] = __traits(getMember, inObj, k);
+  }
+
+  return outJson;
+}
