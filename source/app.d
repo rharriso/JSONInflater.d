@@ -18,13 +18,13 @@ void main()
   JSONInflater.Unmarshall(to, json_v);
   JSONInflater.Unmarshall(to2, json_v2);
 
-  writeln(JSONInflater.Marshall(to));
-  writeln(JSONInflater.Marshall(to2));
+  writeln(JSONInflater.Marshall(to).toString());
+  writeln(JSONInflater.Marshall(to2).toString());
 }
 
 class TestObj{
-  int id = 0;
-  string name = "";
+  int id;
+  string name;
 }
 
 class TestObj2{
