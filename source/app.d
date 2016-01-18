@@ -16,7 +16,7 @@ void main()
   TestObj to = new TestObj();
   TestObj2 to2 = new TestObj2();
   JSONInflater.Unmarshall(to, json_v);
-  JSONInflater.Unmarshall(to2, json_v);
+  JSONInflater.Unmarshall(to2, json_v2);
 
   writeln(to);
   writeln(to2);
