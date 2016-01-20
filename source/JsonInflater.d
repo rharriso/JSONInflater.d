@@ -23,13 +23,13 @@ void Unmarshall(T)(ref T obj, in JSONValue json){
 
     switch(jsonField.type){
       case JSON_TYPE.INTEGER:
-        __traits(getMember, obj, k) = to!(fieldType)(json[k].integer);
+        __traits(getMember, obj, k) = to!(fieldType)(jsonField.integer);
         break;
       case JSON_TYPE.FLOAT:
-        __traits(getMember, obj, k) = to!(fieldType)(json[k].floating);
+        __traits(getMember, obj, k) = to!(fieldType)(jsonField.floating);
         break;
       case JSON_TYPE.STRING:
-       __traits(getMember, obj, k) = to!(fieldType)(json[k].str);
+       __traits(getMember, obj, k) = to!(fieldType)(jsonField.str);
         break;
       default:
         writefln("Don't know how to handle: %s", jsonField.type);

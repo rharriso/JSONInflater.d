@@ -6,10 +6,12 @@ void main()
 {
   auto json_s = `{"id": 7, "name": "Really cool Guy"}`;
   auto json_s2 = `
-   {"id": 7,
+   {"id": 8,
     "name": "Really cool Guy is cool",
     "favoriteSport": "Basketball",
-    "favoriteColor": "red"}`;
+    "favoriteColor": "red",
+    "testy": {"id": 9, "name": "Really cool Guy"}
+   }`;
   auto json_v = std.json.parseJSON(json_s);
   auto json_v2 = std.json.parseJSON(json_s2);
 
