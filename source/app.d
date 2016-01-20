@@ -34,4 +34,5 @@ class TestObj2{
   string name;
   string favoriteColor;
   string favoriteSport;
+  TestObj testy;
 }
