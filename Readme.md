@@ -18,6 +18,6 @@ dub build --build=debug --compiler=ldc && ./jsoninflater
 I still need to work on some other things before relasing it.
 
 * [x] Recursive parsing. (nested objects)
-* [ ] Arrays
+* [x] Arrays
 * [ ] Tests
 * [ ] Benchmarks
