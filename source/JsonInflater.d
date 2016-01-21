@@ -7,63 +7,98 @@ import std.range;
 import std.algorithm;
 import std.array;
 import std.conv;
+import std.typecons;
 
 /*
-  Applly values form json object to ouput object
-*/
+   Applly values form json object to ouput object
+ */
 void Unmarshall(T)(ref T obj, in JSONValue json){
-  alias fnt = FieldNameTuple!T;
+  // handle arrays
+  static if(isDynamicArray!T){
+    foreach(el ; json.array){
+      obj.length++;
+      auto child = new ElementType!T;
+      JSONInflater.Unmarshall(child, el);
+      obj[$ - 1] = child;
+    }
 
-  // create map from name to type
-  foreach(k; fnt){
-    if(!(k in json)) continue;
+  } else {
+    // handle signular elements
+    alias fnt = FieldNameTuple!T;
 
-    alias fieldType = typeof(__traits(getMember, obj, k));
-    auto jsonField = json[k];
+    // create map from name to type
+    foreach(k; fnt){
+      if(!(k in json)) continue;
 
-    static if(isBasicType!fieldType || isNarrowString!fieldType){
+      alias fieldType = typeof(__traits(getMember, obj, k));
+      auto jsonField = json[k];
 
-      switch(jsonField.type){
-        case JSON_TYPE.INTEGER:
-          __traits(getMember, obj, k) = to!(fieldType)(jsonField.integer);
-          break;
-        case JSON_TYPE.FLOAT:
-          __traits(getMember, obj, k) = to!(fieldType)(jsonField.floating);
-          break;
-        case JSON_TYPE.STRING:
-         __traits(getMember, obj, k) = to!(fieldType)(jsonField.str);
-          break;
-        default:
-          writefln("Don't know how to handle: %s", jsonField.type);
+      static if(isBasicType!fieldType || isNarrowString!fieldType){
+
+        switch(jsonField.type){
+          case JSON_TYPE.INTEGER:
+            __traits(getMember, obj, k) = to!(fieldType)(jsonField.integer);
+            break;
+          case JSON_TYPE.FLOAT:
+            __traits(getMember, obj, k) = to!(fieldType)(jsonField.floating);
+            break;
+          case JSON_TYPE.STRING:
+            __traits(getMember, obj, k) = to!(fieldType)(jsonField.str);
+            break;
+          default:
+            writefln("Don't know how to handle: %s", jsonField.type);
+        }
+
+      } else static if(isStaticArray!fieldType){
+        std.stdio.stderr.writeln("Don't support static arrays"); 
+
+      } else static if(isDynamicArray!fieldType){
+        JSONInflater.Unmarshall(__traits(getMember, obj, k), jsonField);
+
+      } else {
+        auto child = new fieldType;
+        JSONInflater.Unmarshall(child, jsonField);
+        __traits(getMember, obj, k) = child;
       }
-
-    } else {
-      auto child = new fieldType;
-      JSONInflater.Unmarshall(child, jsonField);
-      __traits(getMember, obj, k) = child;
     }
   }
 }
 
 /*
-  return json object for a given class
-*/
+   return json object for a given class
+ */
 JSONValue* Marshall(T)(in T inObj){
-  alias fnt = FieldNameTuple!T;
-  auto outJson = new JSONValue(parseJSON("{}"));
-  
-  // create map from name to type
-  foreach(k; fnt){
-    alias fieldType = typeof(__traits(getMember, inObj, k));
-
-    static if(isBasicType!fieldType || isNarrowString!fieldType){
-      outJson.object[k] = JSONValue(__traits(getMember, inObj, k));
-    } else { // assume object
-      writeln("doing i peter");
-      auto child = new fieldType;
-      outJson.object[k] = JSONInflater.Marshall!(fieldType)(child).object;
+  // handle arrays
+  static if(isArray!T){
+    auto outJson = new JSONValue(parseJSON("[]"));
+    foreach(el ; inObj){
+      outJson.array.length ++;
+      auto child = JSONInflater.Marshall(el);
+      outJson.array[$ - 1] = *child;
     }
-  }
+    return outJson;
 
-  return outJson;
+  } else {
+    alias fnt = FieldNameTuple!T;
+    auto outJson = new JSONValue(parseJSON("{}"));
+
+    // create map from name to type
+    foreach(k; fnt){
+      alias fieldType = typeof(__traits(getMember, inObj, k));
+
+      static if(isBasicType!fieldType || isNarrowString!fieldType){
+        outJson.object[k] = JSONValue(__traits(getMember, inObj, k));
+
+      } else static if(isArray!fieldType){
+        outJson.object[k] = 
+          JSONInflater.Marshall!(fieldType)(__traits(getMember, inObj, k)).array;
+
+      } else { // assume object
+        outJson.object[k] =
+          JSONInflater.Marshall!(fieldType)(__traits(getMember, inObj, k)).object;
+      }
+    }
+    
+    return outJson;
+  }
 }
