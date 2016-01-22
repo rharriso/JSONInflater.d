@@ -13,8 +13,10 @@ import std.typecons;
    Applly values form json object to ouput object
  */
 void Unmarshall(T)(ref T obj, in JSONValue json){
+  enum auto isArray = isDynamicArray!T; 
+
   // handle arrays
-  static if(isDynamicArray!T){
+  static if(isArray){
     foreach(el ; json.array){
       obj.length++;
       auto child = new ElementType!T;
@@ -24,16 +26,20 @@ void Unmarshall(T)(ref T obj, in JSONValue json){
 
   } else {
     // handle signular elements
-    alias fnt = FieldNameTuple!T;
+    enum auto fnt = FieldNameTuple!T;
 
     // create map from name to type
     foreach(k; fnt){
       if(!(k in json)) continue;
 
-      alias fieldType = typeof(__traits(getMember, obj, k));
+      alias fieldType = typeof(__traits(getMember, T, k));
+      enum auto isBasic = isBasicType!fieldType || isNarrowString!fieldType;
+      enum auto isSArray = isStaticArray!fieldType;
+      enum auto isDArray = isDynamicArray!fieldType;
+
       auto jsonField = json[k];
 
-      static if(isBasicType!fieldType || isNarrowString!fieldType){
+      static if(isBasic){
 
         switch(jsonField.type){
           case JSON_TYPE.INTEGER:
@@ -49,10 +55,10 @@ void Unmarshall(T)(ref T obj, in JSONValue json){
             writefln("Don't know how to handle: %s", jsonField.type);
         }
 
-      } else static if(isStaticArray!fieldType){
+      } else static if(isSArray){
         std.stdio.stderr.writeln("Don't support static arrays"); 
 
-      } else static if(isDynamicArray!fieldType){
+      } else static if(isDArray){
         JSONInflater.Unmarshall(__traits(getMember, obj, k), jsonField);
 
       } else {
@@ -79,12 +85,12 @@ JSONValue* Marshall(T)(in T inObj){
     return outJson;
 
   } else {
-    alias fnt = FieldNameTuple!T;
+    enum auto fnt = FieldNameTuple!T;
     auto outJson = new JSONValue(parseJSON("{}"));
 
     // create map from name to type
     foreach(k; fnt){
-      alias fieldType = typeof(__traits(getMember, inObj, k));
+      alias fieldType = typeof(__traits(getMember, T, k));
 
       static if(isBasicType!fieldType || isNarrowString!fieldType){
         outJson.object[k] = JSONValue(__traits(getMember, inObj, k));
