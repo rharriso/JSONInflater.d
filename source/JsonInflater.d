@@ -13,15 +13,14 @@ import std.typecons;
    Applly values form json object to ouput object
  */
 void Unmarshall(T)(ref T obj, in JSONValue json){
-  enum auto isArray = isDynamicArray!T; 
+  enum isArray = isDynamicArray!T; 
 
   // handle arrays
   static if(isArray){
     foreach(el ; json.array){
-      obj.length++;
       auto child = new ElementType!T;
       JSONInflater.Unmarshall(child, el);
-      obj[$ - 1] = child;
+      obj ~= child;
     }
 
   } else {
@@ -33,9 +32,9 @@ void Unmarshall(T)(ref T obj, in JSONValue json){
       if(!(k in json)) continue;
 
       alias fieldType = typeof(__traits(getMember, T, k));
-      enum auto isBasic = isBasicType!fieldType || isNarrowString!fieldType;
-      enum auto isSArray = isStaticArray!fieldType;
-      enum auto isDArray = isDynamicArray!fieldType;
+      enum isBasic = isBasicType!fieldType || isNarrowString!fieldType;
+      enum isSArray = isStaticArray!fieldType;
+      enum isDArray = isDynamicArray!fieldType;
 
       auto jsonField = json[k];
 
@@ -78,9 +77,8 @@ JSONValue* Marshall(T)(in T inObj){
   static if(isArray!T){
     auto outJson = new JSONValue(parseJSON("[]"));
     foreach(el ; inObj){
-      outJson.array.length ++;
       auto child = JSONInflater.Marshall(el);
-      outJson.array[$ - 1] = *child;
+      outJson.array ~= *child;
     }
     return outJson;
 
