@@ -32,9 +32,10 @@ void Unmarshall(T)(ref T obj, in JSONValue json){
       if(!(k in json)) continue;
 
       alias fieldType = typeof(__traits(getMember, T, k));
-      enum isBasic = isBasicType!fieldType || isNarrowString!fieldType;
+      enum isBasic  = isBasicType!fieldType || isNarrowString!fieldType;
       enum isSArray = isStaticArray!fieldType;
       enum isDArray = isDynamicArray!fieldType;
+      enum isAgg    = isAggregateType!fieldType;
 
       auto jsonField = json[k];
 
@@ -60,11 +61,15 @@ void Unmarshall(T)(ref T obj, in JSONValue json){
       } else static if(isDArray){
         JSONInflater.Unmarshall(__traits(getMember, obj, k), jsonField);
 
-      } else {
+      } else static if(isAgg){
         auto child = new fieldType;
         JSONInflater.Unmarshall(child, jsonField);
         __traits(getMember, obj, k) = child;
-      }
+      
+      } else{
+        writeln(fieldType.stringof);
+        assert(false, "couldn't handle type");
+     }
     }
   }
 }
@@ -89,17 +94,22 @@ JSONValue* Marshall(T)(in T inObj){
     // create map from name to type
     foreach(k; fnt){
       alias fieldType = typeof(__traits(getMember, T, k));
+      enum  isBasic   = isBasicType!fieldType;
+      enum isArray    = isArray!fieldType;
+      enum isAgg      = isAggregateType!fieldType;
 
-      static if(isBasicType!fieldType || isNarrowString!fieldType){
+      static if(isBasic || isNarrowString!fieldType){
         outJson.object[k] = JSONValue(__traits(getMember, inObj, k));
 
-      } else static if(isArray!fieldType){
+      } else static if(isArray){
         outJson.object[k] = 
           JSONInflater.Marshall!(fieldType)(__traits(getMember, inObj, k)).array;
 
-      } else { // assume object
+      } else static if(isAgg){
         outJson.object[k] =
           JSONInflater.Marshall!(fieldType)(__traits(getMember, inObj, k)).object;
+      } else {
+
       }
     }
     
