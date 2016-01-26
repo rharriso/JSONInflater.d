@@ -162,15 +162,15 @@ unittest{
   TestObj2 to2 = new TestObj2();
   JSONInflater.Unmarshall(to2, *json);
   
-  assert(to2.id == 8);
-  assert(to2.name == "Really cool Guy is cool");
-  assert(to2.favoriteSport == "Basketball");
-  assert(to2.favoriteColor == "red");
-  assert(to2.testy.id == 9);
-  assert(to2.testy.name == "Really cool Guy");
-  assert(to2.children.length == 2);
-  assert(to2.children[0].id == 10);
-  assert(to2.children[0].name == "Guy Foreal");
-  assert(to2.children[1].id == 11);
-  assert(to2.children[1].name == "Derick 4Real");
+  assert(to2.id == 8, "object id should be set");
+  assert(to2.name == "Really cool Guy is cool", "object name should be set");
+  assert(to2.favoriteSport == "Basketball", "object sport should be set");
+  assert(to2.favoriteColor == "red", "object color should be set");
+  assert(to2.testy.id == 9, "child id should be set");
+  assert(to2.testy.name == "Really cool Guy", "child name");
+  assert(to2.children.length == 2, "subarray length");
+  assert(to2.children[0].id == 10, "subarray id");
+  assert(to2.children[0].name == "Guy Foreal", "subarray name");
+  assert(to2.children[1].id == 11, "subarray id");
+  assert(to2.children[1].name == "Derick 4Real", "subarray name");
 }
