@@ -5,4 +5,5 @@ __dummy.html
 *.obj
 jsoninflater
 dub.selections.json
-
+JSONInflater
+__test__library__
