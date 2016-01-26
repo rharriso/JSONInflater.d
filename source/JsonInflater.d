@@ -116,3 +116,58 @@ JSONValue* Marshall(T)(in T inObj){
     return outJson;
   }
 }
+
+
+
+
+class TestObj{
+  int id;
+  string name;
+}
+
+class TestObj2{
+  int id;
+  string name;
+  string favoriteColor;
+  string favoriteSport;
+  TestObj testy;
+  TestObj[] children;
+}
+///
+/// UnitTest
+///
+unittest{
+
+  auto json_s = `{"id": 7, "name": "Really cool Guy"}`;
+  auto json_s2 = `
+   {"id": 8,
+    "name": "Really cool Guy is cool",
+    "favoriteSport": "Basketball",
+    "favoriteColor": "red",
+    "testy": {"id": 9, "name": "Really cool Guy"},
+    "children": [
+       {"id": 10, "name": "Guy Foreal"},
+       {"id": 11, "name": "Derick 4Real"}
+    ]
+   }`;
+  
+  auto json_v = std.json.parseJSON(json_s);
+  auto json_v2 = std.json.parseJSON(json_s2);
+
+  TestObj to = new TestObj();
+  TestObj2 to2 = new TestObj2();
+  JSONInflater.Unmarshall(to, json_v);
+  JSONInflater.Unmarshall(to2, json_v2);
+
+  assert(to2.id == 8);
+  assert(to2.name == "Really cool Guy is cool");
+  assert(to2.favoriteSport == "Basketball");
+  assert(to2.favoriteColor == "red");
+  assert(to2.testy.id == 9);
+  assert(to2.testy.name == "Really cool Guy");
+  assert(to2.children.length == 2);
+  assert(to2.children[0].id == 10);
+  assert(to2.children[0].name == "Guy Foreal");
+  assert(to2.children[1].id == 11);
+  assert(to2.children[1].name == "Derick 4Real");
+}
