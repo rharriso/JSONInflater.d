@@ -13,17 +13,22 @@ import std.typecons;
    Applly values form json object to ouput object
  */
 void Unmarshall(T)(ref T obj, in JSONValue json){
-  enum isArray = isDynamicArray!T; 
-
   // handle arrays
-  static if(isArray){
+  static if(isDynamicArray!T){
     foreach(el ; json.array){
       auto child = new ElementType!T;
       JSONInflater.Unmarshall(child, el);
       obj ~= child;
     }
-
+  
+  } else static if(isStaticArray!T){
+    assert(false, "not supporting static right now");
   } else {
+    // initialize object if not done so
+    if(obj is null){
+      obj = new T();
+    }
+
     // handle signular elements
     enum auto fnt = FieldNameTuple!T;
 
@@ -52,7 +57,7 @@ void Unmarshall(T)(ref T obj, in JSONValue json){
             __traits(getMember, obj, k) = to!(fieldType)(jsonField.str);
             break;
           default:
-            writefln("Don't know how to handle: %s", jsonField.type);
+            assert(false, "Don't know how to handle type");
         }
 
       } else static if(isSArray){
@@ -146,12 +151,11 @@ unittest{
   inObj.name = "Really cool Guy is cool";
   inObj.favoriteSport = "Basketball";
   inObj.favoriteColor = "red";
-  JSONInflater.Unmarshall(inObj.testy, parseJSON(`"testy": {"id": 9, "name": "Really cool Guy"}`));
-  /*JSONInflater.Unmarshall(inObj.children, parseJSON(`
-    "children": [
+  JSONInflater.Unmarshall(inObj.testy, parseJSON(`{"id": 9, "name": "Really cool Guy"}`));
+  JSONInflater.Unmarshall(inObj.children, parseJSON(`[
        {"id": 10, "name": "Guy Foreal"},
        {"id": 11, "name": "Derick 4Real"}
-  `));*/
+  ]`));
    
   
   auto json = JSONInflater.Marshall(inObj);
