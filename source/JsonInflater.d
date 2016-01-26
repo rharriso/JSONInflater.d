@@ -161,7 +161,7 @@ unittest{
   auto json = JSONInflater.Marshall(inObj);
   TestObj2 to2 = new TestObj2();
   JSONInflater.Unmarshall(to2, *json);
-/*
+  
   assert(to2.id == 8);
   assert(to2.name == "Really cool Guy is cool");
   assert(to2.favoriteSport == "Basketball");
@@ -172,5 +172,5 @@ unittest{
   assert(to2.children[0].id == 10);
   assert(to2.children[0].name == "Guy Foreal");
   assert(to2.children[1].id == 11);
-  assert(to2.children[1].name == "Derick 4Real");*/
+  assert(to2.children[1].name == "Derick 4Real");
 }
