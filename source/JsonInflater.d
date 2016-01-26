@@ -146,8 +146,8 @@ unittest{
   inObj.name = "Really cool Guy is cool";
   inObj.favoriteSport = "Basketball";
   inObj.favoriteColor = "red";
-  /*JSONInflater.Unmarshall(inObj.testy, parseJSON(`"testy": {"id": 9, "name": "Really cool Guy"}`));
-  JSONInflater.Unmarshall(inObj.children, parseJSON(`
+  JSONInflater.Unmarshall(inObj.testy, parseJSON(`"testy": {"id": 9, "name": "Really cool Guy"}`));
+  /*JSONInflater.Unmarshall(inObj.children, parseJSON(`
     "children": [
        {"id": 10, "name": "Guy Foreal"},
        {"id": 11, "name": "Derick 4Real"}
