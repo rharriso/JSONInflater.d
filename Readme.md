@@ -19,5 +19,6 @@ I still need to work on some other things before relasing it.
 
 * [x] Recursive parsing. (nested objects)
 * [x] Arrays
-* [ ] Tests
+* [x] Tests
 * [ ] Benchmarks
+* [ ] Static Arrays
