@@ -171,6 +171,6 @@ unittest{
   assert(to2.children.length == 2, "subarray length");
   assert(to2.children[0].id == 10, "subarray id");
   assert(to2.children[0].name == "Guy Foreal", "subarray name");
-  assert(to2.children[1].id == 11, "subarray id");
+  assert(to2.children[1].id == 10, "subarray id");
   assert(to2.children[1].name == "Derick 4Real", "subarray name");
 }
