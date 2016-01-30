@@ -14,13 +14,27 @@ import std.typecons;
 void unmarshall(T)(ref T obj, in JSONValue json)
 {
     // handle arrays
-    static if (isDynamicArray!T)
+    static if (isArray!T)
     {
-        foreach (el; json.array)
+        auto jArr = json.array();
+
+        static if (isStaticArray!T)
+        {
+            assert(obj.length == jArr.length, "Array Size Mismatch obj");
+        }
+
+        for (int i = 0; i < json.array.length; i++)
         {
             auto child = new ElementType!T;
-            json_inflater.unmarshall(child, el);
-            obj ~= child;
+            json_inflater.unmarshall(child, jArr[i]);
+            static if (isDynamicArray!T)
+            {
+                obj ~= child;
+            }
+            else
+            {
+                obj[i] = child;
+            }
         }
 
     }
@@ -46,14 +60,9 @@ void unmarshall(T)(ref T obj, in JSONValue json)
                 continue;
 
             alias fieldType = typeof(__traits(getMember, T, k));
-            enum isBasic = isBasicType!fieldType || isNarrowString!fieldType;
-            enum isSArray = isStaticArray!fieldType;
-            enum isDArray = isDynamicArray!fieldType;
-            enum isAgg = isAggregateType!fieldType;
-
             auto jsonField = json[k];
 
-            static if (isBasic)
+            static if (isBasicType!fieldType || isNarrowString!fieldType)
             {
 
                 switch (jsonField.type)
@@ -74,17 +83,12 @@ void unmarshall(T)(ref T obj, in JSONValue json)
                 }
 
             }
-            else static if (isSArray)
-            {
-                std.stdio.stderr.writeln("Don't support static arrays");
-
-            }
-            else static if (isDArray)
+            else static if (isArray!fieldType)
             {
                 json_inflater.unmarshall(__traits(getMember, obj, k), jsonField);
 
             }
-            else static if (isAgg)
+            else static if (isAggregateType!fieldType)
             {
                 auto child = new fieldType;
                 json_inflater.unmarshall(child, jsonField);
@@ -93,7 +97,6 @@ void unmarshall(T)(ref T obj, in JSONValue json)
             }
             else
             {
-                writeln(fieldType.stringof);
                 assert(false, "couldn't handle type");
             }
         }
@@ -106,11 +109,7 @@ void unmarshall(T)(ref T obj, in JSONValue json)
 JSONValue* marshall(T)(in T inObj)
 {
     // handle arrays
-    if (inObj is null)
-    {
-        return new JSONValue();
-    }
-    else static if (isArray!T)
+    static if (isArray!T)
     {
         auto outJson = new JSONValue(parseJSON("[]"));
         foreach (el; inObj)
@@ -118,10 +117,9 @@ JSONValue* marshall(T)(in T inObj)
             auto child = json_inflater.marshall(el);
             outJson.array ~= *child;
         }
-        return outJson;
 
     }
-    else
+    else static if (isAggregateType!T)
     {
         enum auto fnt = FieldNameTuple!T;
         auto outJson = new JSONValue(parseJSON("{}"));
@@ -156,9 +154,14 @@ JSONValue* marshall(T)(in T inObj)
                 assert(false, "can't handle this type");
             }
         }
-
-        return outJson;
     }
+    else
+    {
+        // asume null
+        auto outJson = new JSONValue();
+    }
+
+    return outJson;
 }
 
 ///
@@ -181,6 +184,7 @@ unittest
         TestObj testy;
         TestObj[] children;
     }
+
     auto inObj = new TestObj2();
     inObj.id = 8;
     inObj.name = "Really cool Guy is cool";
@@ -208,11 +212,14 @@ unittest
     assert(to2.children[1].id == 11, "subarray id");
     assert(to2.children[1].name == "Derick 4Real", "subarray name");
 
-    TestObj[2] testPair;
-    json_inflater.unmarshall(testPair, parseJSON(`[
+    TestObj[2] tp;
+    json_inflater.unmarshall(tp, parseJSON(`[
        {"id": 10, "name": "Guy Foreal"},
        {"id": 11, "name": "Derick 4Real"}
   ]`));
+    TestObj[2] testPair;
+    json_inflater.unmarshall(testPair, *json_inflater.marshall(tp));
+
     assert(testPair[0].id == 10, "subarray id");
     assert(testPair[0].name == "Guy Foreal", "subarray name");
     assert(testPair[1].id == 11, "subarray id");
