@@ -21,4 +21,4 @@ I still need to work on some other things before relasing it.
 * [x] Arrays
 * [x] Tests
 * [ ] Benchmarks
-* [ ] Static Arrays
+* [x] Static Arrays
