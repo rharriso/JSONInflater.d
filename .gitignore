@@ -7,3 +7,8 @@ jsoninflater
 dub.selections.json
 JSONInflater
 __test__library__
+/..-..*
+/.idea/
+/libjsoninflater.a
+/source-JsonInflater.lst
+/jsoninflater.iml
