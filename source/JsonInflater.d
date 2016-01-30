@@ -161,26 +161,26 @@ JSONValue* marshall(T)(in T inObj)
     }
 }
 
-class TestObj
-{
-    int id;
-    string name;
-}
-
-class TestObj2
-{
-    int id;
-    string name;
-    string favoriteColor;
-    string favoriteSport;
-    TestObj testy;
-    TestObj[] children;
-}
 ///
 /// UnitTest
 ///
 unittest
 {
+    static class TestObj
+    {
+        int id;
+        string name;
+    }
+
+    static class TestObj2
+    {
+        int id;
+        string name;
+        string favoriteColor;
+        string favoriteSport;
+        TestObj testy;
+        TestObj[] children;
+    }
     auto inObj = new TestObj2();
     inObj.id = 8;
     inObj.name = "Really cool Guy is cool";
